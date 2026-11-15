@@ -147,13 +147,30 @@
     persist();
     announce('Added to your bag.');
   });
+  // Prefer the MongoDB-backed API. Fall back to the static file when there is
+  // no server (GitHub Pages) or the server runs without a database.
+  async function loadCatalog() {
+    try {
+      const response = await fetch('api/products');
+      if (response.ok) {
+        const data = await response.json();
+        if (Array.isArray(data) && data.length) {
+          console.info(`Loaded ${data.length} products from the API (MongoDB).`);
+          return data;
+        }
+      }
+    } catch { /* No API available: use the static catalog. */ }
+    const response = await fetch('products.json');
+    if (!response.ok) throw new Error(`products.json returned HTTP ${response.status}`);
+    const data = await response.json();
+    console.info(`Loaded ${Array.isArray(data) ? data.length : 0} products from products.json.`);
+    return data;
+  }
   async function init() {
     main.innerHTML = '<p role="status">Loading products…</p>';
     try {
-      const response = await fetch('products.json');
-      if (!response.ok) throw new Error(`products.json returned HTTP ${response.status}`);
-      const data = await response.json();
-      if (!Array.isArray(data)) throw new Error('products.json must contain an array of products.');
+      const data = await loadCatalog();
+      if (!Array.isArray(data)) throw new Error('The product catalog must be an array of products.');
       const ids = new Set();
       for (const product of data) {
         if (!product || typeof product.id !== 'string' || ids.has(product.id) || typeof product.name !== 'string' || typeof product.price !== 'number' || !Number.isFinite(product.price) || product.price < 0 || !Array.isArray(product.images) || !product.images.length || !Array.isArray(product.sizes) || !Array.isArray(product.colors) || !Array.isArray(product.care)) {
