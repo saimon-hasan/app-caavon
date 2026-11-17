@@ -107,9 +107,41 @@
                 <input id="login-password" name="password" type="password" autocomplete="current-password" required>
               </div>
               <button class="btn-primary" type="submit">Sign in</button>
+              <button class="btn-secondary" type="button" onclick="location.hash='#account/create'">Create account</button>
               <p id="login-message" class="form-hint" role="status" aria-live="polite"></p>
             </form>
             <a href="#shop/all">Continue shopping</a>
+          </div>
+        </div>
+      </section>`;
+    } else if (route === 'account/create') {
+      main.innerHTML = `<section class="auth-section">
+        <div class="auth-container auth-container-wide">
+          <div class="auth-content">
+            <p class="eyebrow">Join CAAVON</p>
+            <h1>Create account</h1>
+            <p>Create an account for a more personal shopping experience.</p>
+            <form id="create-account-form">
+              <div class="form-group">
+                <label for="create-name">Full name</label>
+                <input id="create-name" name="name" type="text" autocomplete="name" required>
+              </div>
+              <div class="form-group">
+                <label for="create-email">Email address</label>
+                <input id="create-email" name="email" type="email" autocomplete="email" required>
+              </div>
+              <div class="form-group">
+                <label for="create-password">Password</label>
+                <input id="create-password" name="password" type="password" autocomplete="new-password" minlength="8" required>
+              </div>
+              <div class="form-group">
+                <label for="create-password-confirm">Confirm password</label>
+                <input id="create-password-confirm" name="confirmPassword" type="password" autocomplete="new-password" minlength="8" required>
+              </div>
+              <button class="btn-primary" type="submit">Create account</button>
+              <p id="create-account-message" class="form-hint" role="status" aria-live="polite"></p>
+            </form>
+            <a href="#account">Already have an account? Sign in</a>
           </div>
         </div>
       </section>`;
@@ -131,6 +163,20 @@
   });
   main.addEventListener('submit', event => {
     const form = event.target;
+    if (form.id === 'create-account-form') {
+      event.preventDefault();
+      const values = new FormData(form);
+      const password = values.get('password');
+      const confirmation = values.get('confirmPassword');
+      const message = document.getElementById('create-account-message');
+      if (password !== confirmation) {
+        if (message) message.textContent = 'Passwords do not match.';
+        document.getElementById('create-password-confirm').focus();
+        return;
+      }
+      if (message) message.textContent = 'Account creation is not available yet. No information was sent or saved.';
+      return;
+    }
     // Sign-in is a demo: stop the browser from submitting (and putting the password in the URL).
     if (form.id === 'login-form') {
       event.preventDefault();

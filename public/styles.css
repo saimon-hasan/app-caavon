@@ -838,6 +838,10 @@ small {
   max-width: 420px;
 }
 
+.auth-container-wide {
+  max-width: 520px;
+}
+
 .auth-content {
   background: white;
   padding: var(--spacing-2xl);
