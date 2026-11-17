@@ -8,6 +8,9 @@
     try { return JSON.parse(localStorage.getItem(key)) ?? fallback; }
     catch { return fallback; }
   };
+  const productEditsKey = 'caavon-product-edits';
+  const adminSessionKey = 'caavon-admin-session';
+  const demoAdmin = { email: 'admin@caavon.com', password: 'caavon2026' };
   const savedFavorites = read('caavon-favorites', []);
   const favorites = new Set(Array.isArray(savedFavorites) ? savedFavorites : []);
   const savedBag = read('caavon-bag', []);
@@ -97,6 +100,7 @@
             <p class="eyebrow">Welcome back</p>
             <h1>Sign in</h1>
             <p>Sign in to access your CAAVON account.</p>
+            <p class="form-hint">Demo admin credentials: <strong>admin@caavon.com</strong> / <strong>caavon2026</strong></p>
             <form id="login-form">
               <div class="form-group">
                 <label for="login-email">Email address</label>
@@ -180,8 +184,20 @@
     // Sign-in is a demo: stop the browser from submitting (and putting the password in the URL).
     if (form.id === 'login-form') {
       event.preventDefault();
+      const values = new FormData(form);
       const message = document.getElementById('login-message');
-      if (message) message.textContent = 'Sign-in is not available yet. Nothing was sent or saved.';
+      const email = String(values.get('email') || '').trim().toLowerCase();
+      const password = String(values.get('password') || '');
+      if (email !== demoAdmin.email || password !== demoAdmin.password) {
+        if (message) message.textContent = 'Email or password is incorrect.';
+        return;
+      }
+      try {
+        localStorage.setItem(adminSessionKey, 'true');
+        location.hash = '#home';
+      } catch {
+        if (message) message.textContent = 'Could not start the demo admin session. Enable browser storage and try again.';
+      }
       return;
     }
     if (form.id !== 'add-to-bag') return;
@@ -208,6 +224,16 @@
         ids.add(product.id);
       }
       products = data;
+      const edits = read(productEditsKey, {});
+      if (edits && typeof edits === 'object' && !Array.isArray(edits)) {
+        for (const product of products) {
+          const edit = edits[product.id];
+          if (!edit || typeof edit !== 'object') continue;
+          if (typeof edit.name === 'string') product.name = edit.name;
+          if (Number.isFinite(edit.price) && edit.price >= 0) product.price = edit.price;
+          if (typeof edit.description === 'string') product.description = edit.description;
+        }
+      }
       bag = bag.filter(item => ids.has(item.id));
       for (const id of favorites) if (!ids.has(id)) favorites.delete(id);
       persist();
@@ -219,6 +245,18 @@
       document.getElementById('retry-products').addEventListener('click', init);
     }
   }
+  window.addEventListener('caavon-products-updated', event => {
+    const edits = event.detail;
+    if (!edits || typeof edits !== 'object' || Array.isArray(edits)) return;
+    for (const product of products) {
+      const edit = edits[product.id];
+      if (!edit || typeof edit !== 'object') continue;
+      if (typeof edit.name === 'string') product.name = edit.name;
+      if (Number.isFinite(edit.price) && edit.price >= 0) product.price = edit.price;
+      if (typeof edit.description === 'string') product.description = edit.description;
+    }
+    render();
+  });
   updateCounts();
   init();
 })();

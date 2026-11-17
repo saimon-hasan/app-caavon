@@ -1927,3 +1927,66 @@ footer a:hover {
     display: none;
   }
 }
+
+.admin-bar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 4.5%;
+  background: #f0eee8;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.admin-bar > span {
+  margin-right: auto;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.admin-bar .button {
+  min-height: 38px;
+  padding: 10px 16px;
+}
+
+.product-editor-form {
+  display: grid;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.product-editor-form label {
+  margin-top: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+}
+
+.product-editor-form textarea {
+  width: 100%;
+  padding: 13px var(--spacing-md);
+  border: 1px solid var(--color-border);
+  border-radius: 2px;
+  font: inherit;
+  resize: vertical;
+}
+
+.product-editor-form textarea:focus {
+  outline: none;
+  border-color: var(--color-gold);
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, .1);
+}
+
+@media (max-width: 600px) {
+  .admin-bar {
+    flex-wrap: wrap;
+    padding: 12px 16px;
+  }
+
+  .admin-bar > span {
+    width: 100%;
+  }
+}
